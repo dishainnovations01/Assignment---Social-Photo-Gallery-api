@@ -9,6 +9,5 @@ class PasswordEncrypterClass {
     return encryptedPassword
   }
 
-
 }
 module.exports = PasswordEncrypterClass;

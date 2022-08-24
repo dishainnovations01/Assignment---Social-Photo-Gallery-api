@@ -5,6 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const UploaderClass = require('../Functions/UploaderClass');
 const UserController = require('../Controllers/UserController');
+const PasswordEncrypterClass = require('../Functions/PasswordEncrypter');
 
 
 router.post("/", async (req, res) => {
@@ -19,36 +20,27 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.patch("/login", async (req, res) => {
+  try {
+    req.body.password = PasswordEncrypterClass.encrypt(req.body.password) 
+    var resdata = await User.findOne({ userId: req.body.userId,password: req.body.password })
+    res.json(resdata)
+
+  } catch (err) {
+    res.status(420).send({ message: err });
+  }
+});
+
 // fetch all..
 router.get('/byid', async (req, res) => {
   try {
-    //   if (req.headers["auth-key"] == process.env.AUTH_KEY) {
     var data = await Customer.findById(req.query._id)
     res.json(data)
-    //   } else {
-    //     res.status(401).send({ message: "unauthorised" });
-    //   }
   }
   catch (err) {
     res.status(420).send({ message: 'Error' })
   }
 })
-
-router.patch("/update", async (req, res) => {
-  try {
-    // if (req.headers["auth-key"] == process.env.AUTH_KEY) {
-    var data = await User.updateOne({ _id: req.body._id }, {
-      $set: req.body
-    })
-    var resdata = await User.findOne({ _id: req.body._id })
-    res.json(resdata)
-    // } else {
-    //     res.status(401).send({ message: "unauthorised" })
-    // }
-  } catch (err) {
-    res.status(420).send({ message: err });
-  }
-});
 
 // update profile image
 router.patch("/updateprofile", async (req, res) => {

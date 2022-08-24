@@ -3,7 +3,6 @@ const router = express.Router();
 const User = require('../models/User')
 const path = require('path')
 const fs = require('fs')
-
 const ImageLikeDislikeController = require('../Controllers/ImageLikeDislikeController');
 
 router.post("/", async (req, res) => {

@@ -5,7 +5,7 @@ const path = require('path')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const app = express()
-const port = 3000
+const port = 4000
 require('dotenv/config')
 app.use(cors())
 app.use(bodyParser.json({limit: '50mb'}));
