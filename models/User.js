@@ -47,4 +47,4 @@ const UserSchema = mongoose.Schema(
     }
 )
 UserSchema.plugin(mongoosePaginate);
-module.exports = mongoose.model('User', UserSchema)
+module.exports = mongoose.model('User', UserSchema,"users")

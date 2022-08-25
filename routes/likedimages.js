@@ -8,7 +8,8 @@ const ImageLikeDislikeController = require('../Controllers/ImageLikeDislikeContr
 router.post("/", async (req, res) => {
   try {
     var data = await ImageLikeDislikeController.create(req)
-    res.json(data)
+    // console.log(data)
+    res.json(data[0])
   } catch (err) {
     res.status(420).send({ message: err.toString() });
   }

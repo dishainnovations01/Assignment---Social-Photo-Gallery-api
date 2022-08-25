@@ -1,6 +1,7 @@
 var express = require('express');
 const mongoose = require("mongoose");
 const LikedImages = require('../models/LikedImages');
+const { singleobjectphotogallery } = require('./PhotoGalleryController');
 
 class ImageLikeDislikeController {
 
@@ -37,10 +38,12 @@ class ImageLikeDislikeController {
             await LikedImages.updateOne({ _id: findData._id }, {
                 $set: req.body
             })
-            return await LikedImages.findOne({_id: findData._id})
+            return await singleobjectphotogallery(req.body.imageId,req.body.userId)
         }else{
             const data = new LikedImages(req.body)
-            return await data.save()
+            var savedata = await data.save()
+            return await singleobjectphotogallery(savedata._id,req.body.userId)
+
         }
     }
 

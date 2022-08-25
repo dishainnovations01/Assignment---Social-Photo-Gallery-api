@@ -12,6 +12,10 @@ const { default: mongoose } = require('mongoose');
 // fetch all..
 router.get('/', async (req, res) => {
     try {
+      console.log(req.headers)
+      var limit = parseInt(req.headers["limit"])
+      var page = parseInt(req.headers["page"])
+      var offset = (limit * page) - limit
         var findUser = await User.findOne({_id: req.query.userId,userType: "Admin"})
         findUser = JSON.parse(JSON.stringify(findUser))
         if(findUser){
@@ -44,16 +48,18 @@ router.get('/', async (req, res) => {
                   }}
                   ,{
                     "$project": {
-                        "_id": "$id",
+                        "_id": "$_id",
                         "image": "$image",
                         "imageName": "$imageName",
                         "description": "$description",
                         "createdAt": "$createdAt",
                         "updatedAt": "$updatedAt",
                         "likeReactions": {"$arrayElemAt": [ "$likeReactions.count", 0]},
-                        "dislikereactions": {"$arrayElemAt": [ "$likeReactions.count", 0]}
+                        "dislikeReactions": {"$arrayElemAt": [ "$dislikereactions.count", 0]}
                     }
-                  }
+                  },
+                  {$skip: offset },
+                  {$limit: limit }
             ]).exec()
             res.json(data)
         }else{
@@ -83,7 +89,7 @@ router.get('/', async (req, res) => {
                     "as": "disliked"
                   }},{
                     "$project": {
-                        "_id": "$id",
+                        "_id": "$_id",
                         "image": "$image",
                         "imageName": "$imageName",
                         "description": "$description",
@@ -92,7 +98,9 @@ router.get('/', async (req, res) => {
                         "liked": {"$arrayElemAt": [ "$liked._id", 0]},
                         "disliked": {"$arrayElemAt": [ "$disliked._id", 0]}
                     }
-                  }
+                  },
+                  {$skip: offset },
+                  {$limit: limit }
             ]).exec()
             res.json(data)
         }
@@ -107,6 +115,9 @@ router.get('/', async (req, res) => {
 // fetch all..
 router.get('/byuser', async (req, res) => {
     try {
+      var limit = parseInt(req.headers["limit"])
+      var page = parseInt(req.headers["page"])
+      var offset = (limit * page) - limit
         var data = await PhotoGallery.aggregate([
             { "$lookup": {
                 "from": "likedimages",
@@ -160,18 +171,21 @@ router.get('/byuser', async (req, res) => {
               }}
               ,{
                 "$project": {
-                    "_id": "$id",
+                    "_id": "$_id",
                     "image": "$image",
                     "imageName": "$imageName",
                     "description": "$description",
                     "createdAt": "$createdAt",
                     "updatedAt": "$updatedAt",
                     "likeReactions": {"$arrayElemAt": [ "$likeReactions.count", 0]},
-                    "dislikeReactions": {"$arrayElemAt": [ "$likeReactions.count", 0]},
+                    "dislikeReactions": {"$arrayElemAt": [ "$dislikereactions.count", 0]},
                     "liked": {"$arrayElemAt": [ "$liked._id", 0]},
                     "disliked": {"$arrayElemAt": [ "$disliked._id", 0]}
                 }
               }
+              ,
+                  {$skip: offset },
+                  {$limit: limit }
         ]).exec()
         res.json(data)
 
@@ -225,7 +239,7 @@ router.patch("/update", async (req, res) => {
 });
 
 // update profile image
-router.delete("/deleteimage", async (req, res) => {
+router.delete("/", async (req, res) => {
     try {
         var deletedata = await PhotoGalleryController.deletePermanently(req)
         res.json({ message: "Deleted Succesfully" })

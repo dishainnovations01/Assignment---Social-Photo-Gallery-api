@@ -14,8 +14,8 @@ class UploaderClass {
       "data:image/".length,
       base64String.indexOf(";base64")
     );
-    var filename = baseimageurl + Math.floor(100000 + Math.random() * 900000) + Date.now() + "." + extensionname;
-    fs.writeFileSync(filename, imageBuffer);
+    var filename = Math.floor(100000 + Math.random() * 900000) + Date.now() + "." + extensionname;
+    fs.writeFileSync(baseimageurl+filename, imageBuffer);
     return filename;
   }
 

@@ -46,7 +46,81 @@ class PhotoGalleryController {
     }
 
     static async deletePermanently(req){
+        console.log(req.query._id)
         return await PhotoGallery.deleteOne({ _id: req.query._id })
+    }
+
+    static async singleobjectphotogallery(id,userId){
+        var data = await PhotoGallery.aggregate([
+            { "$match": {_id: mongoose.Types.ObjectId(id)}},
+            { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { 
+                    "$match": {"like": true}
+                  },
+                  {
+                    "$group": {"_id": "$imageId", count: {$sum: 1}}
+                  }
+                ],
+                "as": "likeReactions"
+              }},
+              { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { "$match": {"dislike": true
+                  }},
+                  {
+                    "$group": {"_id": "$imageId", count: {$sum: 1}}
+                  }
+                ],
+                "as": "dislikereactions"
+              }}
+              ,    { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { "$match": {"like": true,"userId": mongoose.Types.ObjectId(userId)}},
+                  {
+                    "$project": {"_id": true}
+                  }
+                ],
+                "as": "liked"
+              }},
+              { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { "$match": {"dislike": true,"userId": mongoose.Types.ObjectId(userId)}},
+                   {
+                    "$group": {"_id": true}
+                  }
+                ],
+                "as": "disliked"
+              }}
+              ,{
+                "$project": {
+                    "_id": "$_id",
+                    "image": "$image",
+                    "imageName": "$imageName",
+                    "description": "$description",
+                    "createdAt": "$createdAt",
+                    "updatedAt": "$updatedAt",
+                    "likeReactions": {"$arrayElemAt": [ "$likeReactions.count", 0]},
+                    "dislikeReactions": {"$arrayElemAt": [ "$dislikereactions.count", 0]},
+                    "liked": {"$arrayElemAt": [ "$liked._id", 0]},
+                    "disliked": {"$arrayElemAt": [ "$disliked._id", 0]}
+                }
+              }
+        ]).exec()
+               
+        return data
     }
 }
 module.exports = PhotoGalleryController;
