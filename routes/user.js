@@ -30,7 +30,7 @@ router.post("/login", async (req, res) => {
       res.status(420).send({ message: "Username or password is incorrect!" });
     }
   } catch (err) {
-    res.status(420).send({ message: err });
+    res.status(420).send({ message: err.toString() });
   }
 });
 
