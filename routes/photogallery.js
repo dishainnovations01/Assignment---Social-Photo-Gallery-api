@@ -7,6 +7,7 @@ const UploaderClass = require('../Functions/UploaderClass');
 const PhotoGalleryController = require('../Controllers/PhotoGalleryController');
 const PhotoGallery = require('../models/PhotoGallery');
 const { default: mongoose } = require('mongoose');
+const ImageLikeDislikeController = require('../Controllers/ImageLikeDislikeController');
 
 
 // fetch all..
@@ -242,6 +243,7 @@ router.patch("/update", async (req, res) => {
 router.delete("/", async (req, res) => {
     try {
         var deletedata = await PhotoGalleryController.deletePermanently(req)
+        var deletedata = await ImageLikeDislikeController.deletePermanently(req.query._id)
         res.json({ message: "Deleted Succesfully" })
 
     } catch (err) {

@@ -14,12 +14,39 @@ app.use(bodyParser.raw());
 const { runInNewContext } = require('vm')
 var admin = require("firebase-admin");
 var serviceAccount = require("./firebase.json");
+const WebSocketServer = require('ws');
+const server = require('http').createServer(app);
 
+// Creating a new websocket server
+const wss = new WebSocketServer.Server({ server:server });
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://badabhalu-8cfd8.firebaseio.com/",
   storageBucket: "gs://olib-ecf61.appspot.com"
 });
+
+wss.on("connection", ws => {
+  console.log("new client connected");
+  // sending message
+  ws.on('message', function incoming(message) {
+
+    wss.clients.forEach(function each(client) {
+        client.send(JSON.parse(JSON.stringify(message.toString())));
+    });
+    
+  });
+  
+
+  // handling what to do when clients disconnects from server
+  ws.on("close", () => {
+      console.log("the client has connected");
+  });
+  // handling client connection error
+  ws.onerror = function () {
+      console.log("Some Error occurred")
+  }
+});
+
 
 //database conection
 mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -44,4 +71,6 @@ app.use(express.static('../Uploads/'));
 
 
 app.get('/', (req, res) => res.send("Hello API!"))
+server.listen(8081, () => console.log(`Lisening on port :8081`))
+
 app.listen(port, () => console.log(`Badabhalu app listening on port ${port}s!`))

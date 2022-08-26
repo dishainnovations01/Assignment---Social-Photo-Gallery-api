@@ -42,9 +42,13 @@ class ImageLikeDislikeController {
         }else{
             const data = new LikedImages(req.body)
             var savedata = await data.save()
-            return await singleobjectphotogallery(savedata._id,req.body.userId)
+            return await singleobjectphotogallery(req.body.imageId,req.body.userId)
 
         }
+    }
+
+    static async deletePermanently(imageId){
+        return await LikedImages.deleteOne({ imageId: imageId })
     }
 
 }

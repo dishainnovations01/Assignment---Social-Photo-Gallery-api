@@ -46,7 +46,6 @@ class PhotoGalleryController {
     }
 
     static async deletePermanently(req){
-        console.log(req.query._id)
         return await PhotoGallery.deleteOne({ _id: req.query._id })
     }
 

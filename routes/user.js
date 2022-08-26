@@ -24,7 +24,6 @@ router.post("/login", async (req, res) => {
   try {
     // req.body.password = PasswordEncrypterClass.encrypt(req.body.password) 
     var resdata = await User.findOne({userId: req.body.userId,password: req.body.password })
-    console.log(resdata)
     res.json(resdata)
 
   } catch (err) {
@@ -35,7 +34,6 @@ router.post("/login", async (req, res) => {
 // fetch all..
 router.get('/byid', async (req, res) => {
   try {
-    console.log(req.query._id)
     var data = await User.findOne({_id: req.query._id})
     res.json(data)
   }
