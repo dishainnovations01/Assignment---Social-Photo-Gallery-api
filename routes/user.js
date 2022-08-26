@@ -22,10 +22,13 @@ router.post("/", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    // req.body.password = PasswordEncrypterClass.encrypt(req.body.password) 
+    req.body.password = PasswordEncrypterClass.encrypt(req.body.password) 
     var resdata = await User.findOne({userId: req.body.userId,password: req.body.password })
-    res.json(resdata)
-
+    if(resdata){
+      res.json(resdata)
+    }else{
+      res.status(420).send({ message: "Username or password is incorrect!" });
+    }
   } catch (err) {
     res.status(420).send({ message: err });
   }

@@ -5,19 +5,79 @@ const PhotoGallery = require('../models/PhotoGallery');
 class PhotoGalleryController {
 
     static async list(req){
-        let query = {isDeleted: false}
-        var sortObject = {}
-        if(req.query.searchText){
-            query = Object.assign(query,{categoryName: {'$regex': '.*'+req.query.searchText+'.*' , '$options':'$i'}})
-        }
-        let options = {
-            sort: sortObject,
-            lean: true,
-            populate:  ['shopId'],
-            page: parseInt(req.headers["page"]),
-            limit: parseInt(req.headers["limit"]),
-        };            
-        return await PhotoGallery.paginate(query, options)
+      var limit = parseInt(req.headers["limit"])
+      var page = parseInt(req.headers["page"])
+      var offset = (limit * page) - limit
+        var data = await PhotoGallery.aggregate([
+            { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { "$match": {"like": true
+                  }},
+                  {
+                    "$group": {"_id": "$imageId", count: {$sum: 1}}
+                  }
+                ],
+                "as": "likeReactions"
+              }},
+              { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { "$match": {"dislike": true
+                  }},
+                  {
+                    "$group": {"_id": "$imageId", count: {$sum: 1}}
+                  }
+                ],
+                "as": "dislikereactions"
+              }}
+              ,    { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { "$match": {"like": true,"userId": mongoose.Types.ObjectId(req.query.userId)}},
+                  {
+                    "$project": {"_id": true}
+                  }
+                ],
+                "as": "liked"
+              }},
+              { "$lookup": {
+                "from": "likedimages",
+                "localField": "_id", 
+                "foreignField": "imageId",
+                "pipeline": [
+                  { "$match": {"dislike": true,"userId": mongoose.Types.ObjectId(req.query.userId)}},
+                   {
+                    "$group": {"_id": true}
+                  }
+                ],
+                "as": "disliked"
+              }}
+              ,{
+                "$project": {
+                    "_id": "$_id",
+                    "image": "$image",
+                    "imageName": "$imageName",
+                    "description": "$description",
+                    "createdAt": "$createdAt",
+                    "updatedAt": "$updatedAt",
+                    "likeReactions": {"$arrayElemAt": [ "$likeReactions.count", 0]},
+                    "dislikeReactions": {"$arrayElemAt": [ "$dislikereactions.count", 0]},
+                    "liked": {"$arrayElemAt": [ "$liked._id", 0]},
+                    "disliked": {"$arrayElemAt": [ "$disliked._id", 0]}
+                }
+              }
+              ,
+                  {$skip: offset },
+                  {$limit: limit }
+        ]).exec()        
+        return data
     }
 
     static async object(req){
