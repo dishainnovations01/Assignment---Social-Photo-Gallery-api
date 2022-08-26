@@ -2,7 +2,7 @@ const fs = require("fs");
 var admin = require("firebase-admin");
 
 var bucket = admin.storage().bucket();
-var baseimageurl = "../Uploads/"
+var baseimageurl = "./Uploads/"
 class UploaderClass {
   
   static async uploadFile(image) {

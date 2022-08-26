@@ -67,7 +67,7 @@ const likeDisLikeRoute = require('./routes/likedimages')
 app.use('/users', userRoute)
 app.use('/photogallery',photoGalleryRoute)
 app.use('/likedislike',likeDisLikeRoute)
-app.use(express.static('../Uploads/'));
+app.use(express.static('./Uploads/'));
 
 
 app.get('/', (req, res) => res.send("Hello API!"))
