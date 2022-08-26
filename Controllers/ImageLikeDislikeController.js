@@ -48,7 +48,7 @@ class ImageLikeDislikeController {
     }
 
     static async deletePermanently(imageId){
-        return await LikedImages.deleteOne({ imageId: imageId })
+        return await LikedImages.deleteMany({ imageId: imageId })
     }
 
 }
